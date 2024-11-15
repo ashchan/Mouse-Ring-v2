@@ -28,13 +28,12 @@ config = {
     'charge_current': Battery.CHARGE_50MA,
     'log_level': 'info',
     'log_to_disk': True,
-    'blink_interval': 20000, # lower to blink status more frequently
-    # for button debounce
-    'debounce_sleep': 0.15,
-    # Scroll settings
-    'sp_initial': 0.2,
+    'blink_interval': 20000,        # lower to blink status more frequently
+    'debounce_sleep': 0.15,         # for button debounce
+    'sp_initial': 0.2,              # scroll settings
     'sp_accel': 0.015,
     'sp_max': 0.01,
+    'deep_sleep_by_click': True,    # flag to activate Deep Sleep through buttons clicks
 }
 config.update(hand_config)
 
@@ -152,6 +151,8 @@ scroll_sleep = config['sp_initial']
 # Deep Sleep param
 start_time = None
 push_time = 5 # time to push left and right mouse buttons to go sleep
+IDLE_TIMEOUT = 600 # idle time to activate Deep Sleep (10 minutes)
+last_activity_time = time.monotonic()
 
 ##########################
 # Battery related routines
@@ -161,17 +162,27 @@ def get_batt_percent(volts):
     # Returns battery capacity percent as an integer
     # from 0 to 100.
     batt_table = {
-        4.2: 100,
-        4.13: 90,
-        4.06: 80,
-        3.99: 70,
-        3.92: 60,
-        3.85: 50,
-        3.78: 40,
-        3.71: 30,
-        3.64: 20,
-        3.57: 10,
-        3.5:  0
+        4.26:	100,
+        4.22:	95,
+        4.19:	90,
+        4.15:	85,
+        4.11:	80,
+        4.07:	75,
+        4.03:	70,
+        4.00:	65,
+        3.96:	60,
+        3.92:	55,
+        3.88:	50,
+        3.84:	45,
+        3.80:	40,
+        3.77:	35,
+        3.73:	30,
+        3.69:	25,
+        3.65:	20,
+        3.61:	15,
+        3.58:	10,
+        3.54:	5,
+        3.50:	0
     }
     for k in sorted(batt_table.keys(), reverse = True):
         v = batt_table[k]
@@ -179,8 +190,6 @@ def get_batt_percent(volts):
             # fallthrough to next higher batt level
             continue
         percent = v
-        # TODO - average out between the two keys to get
-        # more granular than just 10% increments
         break
     return percent
 
@@ -192,13 +201,13 @@ def battery_leds():
     percent = get_batt_percent(volts)
 
     charge_status = battery.charge_status
-    log('info',f"Voltage: {battery.voltage}V Charge: {percent}% Charging: {charge_status}")
+    log('info',f"Voltage: {battery.voltage}V Charge: {percent}% Charging: {not charge_status}")
     #if volts > 3.7:
     if charge_status:
         green_led.value = False  # turn on LED
     elif percent > 79:
         green_led.value = False
-    elif percent > 29:
+    elif percent > 19:
         green_led.value = False
         red_led.value = False
     else:
@@ -228,15 +237,13 @@ def enter_sleep():
     blue_led.value = False
     time.sleep(0.2)
     blue_led.value = True
-
     # Set up a wakeup alarm
     switch_alarm = alarm.pin.PinAlarm(pin=config['power_btn'], value=False, edge=False, pull=True)
     # Enter sleep until the alarm is triggered
     log('info', "Enter to Deep Sleep")
     alarm.exit_and_deep_sleep_until_alarms(switch_alarm)
-    log('info', "Exit from Deep Sleep")
- 
-
+    
+    
 ###########
 # MAIN LOOP
 ###########
@@ -248,19 +255,24 @@ while True:
         ble.start_advertising(advertisement, scan_response)
         log('info',"Advertising...")
         while not ble.connected:
+            # Check idle timer
+            if time.monotonic() - last_activity_time > IDLE_TIMEOUT:
+                enter_sleep()
+                
             log('info',"Connecting...")
             blue_led.value = False
             time.sleep(0.5)
             blue_led.value = True
             time.sleep(0.5)
             # Deep Sleep from advertaising
-            if left_BTN.value is False or right_BTN.value is False:
-                start_time = time.monotonic()   # start count button push time
-                while left_BTN.value is False or right_BTN.value is False:
-                    if time.monotonic() - start_time >= push_time and (right_BTN.value is False or left_BTN.value is False):
-                        enter_sleep()
-            else:
-                start_time = None
+            if config[('deep_sleep_by_click')]:
+                if left_BTN.value is False or right_BTN.value is False:
+                    start_time = time.monotonic()   # start count button push time
+                    while left_BTN.value is False or right_BTN.value is False:
+                        if time.monotonic() - start_time >= push_time and (right_BTN.value is False or left_BTN.value is False):
+                            enter_sleep()
+                else:
+                    start_time = None
                                     
             pass
         # Now we're connected
@@ -268,7 +280,11 @@ while True:
         log('info',f"Connected {ble.connections}")
 
     while ble.connected: 
-             
+        
+        # Check idle timer
+        if time.monotonic() - last_activity_time > IDLE_TIMEOUT:
+            enter_sleep()
+                 
         # Perform status LED blinks for bluetooth/voltage
         if i == config['blink_interval'] * 2:
             blue_led.value = False
@@ -277,7 +293,6 @@ while True:
         elif i == config['blink_interval']:
             battery_leds()          
             battery_service.level = get_batt_percent(battery.voltage)   # info from BatteryService to show icon with percentage in Windows
-            log('info', f"Poziom naładowania baterii: {battery_service.level}%")
             LEDOFF_TIME = get_delay_time(0.1)
         elif i % 1000 == 0:
             log('debug',f"LEDOFF {LEDOFF_TIME} MONO {time.monotonic_ns()}")
@@ -296,10 +311,12 @@ while True:
             # mouse.click(Mouse.LEFT_BUTTON)
             mouse.press(Mouse.LEFT_BUTTON)
             start_time = time.monotonic()   # start count button push time
+            last_activity_time = time.monotonic()  # Reset the idle timer
             while left_BTN.value is False:
                 # Deep Sleep trigger
-                if time.monotonic() - start_time >= push_time:
-                    enter_sleep()                
+                if config['deep_sleep_by_click']:
+                    if time.monotonic() - start_time >= push_time:
+                        enter_sleep()                
                 pass
             mouse.release(Mouse.LEFT_BUTTON)
             start_time = None
@@ -312,10 +329,12 @@ while True:
             # mouse.click(Mouse.RIGHT_BUTTON)
             mouse.press(Mouse.RIGHT_BUTTON) 
             start_time = time.monotonic()   # start count button push time
+            last_activity_time = time.monotonic()  # Reset the idle timer
             while right_BTN.value is False:
                 # Deep Sleep trigger
-                if time.monotonic() - start_time >= push_time:
-                    enter_sleep()
+                if config['deep_sleep_by_click']:
+                    if time.monotonic() - start_time >= push_time:
+                        enter_sleep()
                 pass
             mouse.release(Mouse.RIGHT_BUTTON)
             start_time = None
@@ -331,6 +350,7 @@ while True:
             DEBOUNCE_TIME = get_delay_time(scroll_sleep)
             mouse.move(wheel=1)
             log('info',"Up Button is pressed")
+            last_activity_time = time.monotonic()  # Reset the idle timer
 
         elif not scrolldown_BTN.value:
             if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
@@ -342,6 +362,7 @@ while True:
             DEBOUNCE_TIME = get_delay_time(scroll_sleep)
             mouse.move(wheel=-1)
             log('info',"Down Button is pressed")
+            last_activity_time = time.monotonic()  # Reset the idle timer
 
         else:
             if scroll_sleep != config['sp_initial']:

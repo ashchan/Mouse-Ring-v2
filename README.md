@@ -1,6 +1,7 @@
 # Mouse-buttons-and-wheel v2 (joystick)
 ## Description
-![Rings](/images/rings.png)
+
+   ![Rings](/images/rings.png)
 
 HID controller with joystick (4 ways and push). There are: left mouse click, right mouse click, wheel up and wheel down as joystick axis and push to recover from deep sleep. Built on the basis of the "Seeed Studio XIAO nRF52840" microcontroller and programmed in CircuitPython. Cotroller is connecting with PC by Bluetooth.
 
@@ -9,16 +10,20 @@ The code was created for the need of easy mouse control with VR headset. Microco
 ## Usability
 1. Joystick operations
 - movements:
-![Movements](/images/movements.png)
+
+  ![Movements](/images/movements.png)
+
 2. LEDs communication
 - advertasing for connection: :large_blue_circle: blinking every second
 - when connected (alternating at approximately every 5 seconds)
     - bluetooth connection confirmation: :large_blue_circle: blink
-    - battery charge status: :green_circle: blink - more then 70%, :orange_circle: blink - between 30-69%, :red_circle: blink 
+    - battery charge status: :green_circle: blink - more then 80%, :orange_circle: blink - between 20-80%, :red_circle: blink - less then 20% 
 - deep sleep: starting the mode is signaled by successive fast blinks :red_circle:, :green_circle: and :large_blue_circle:
 - battery charging is indicated by :green_circle: continuous light
 3. Battery charge indication:
-![Charge indication](/images/charge.png)
+
+   ![Charge indication](/images/charge.png)
+
 4. Deep Sleep mode for energy saving can be activated in two ways:
 - by long press (around 5 seconds) left or right clicks
 - automatically after about 10 minutes of inactivity
@@ -28,8 +33,10 @@ Waking up occurs by clicking the joystick.
 1. Download CircuitPython .uf2 dedicated boot loader from [here](https://circuitpython.org/board/Seeed_XIAO_nRF52840_Sense/).
 2. Installing CircuitPython on the microcontroller according the [instruction](https://learn.adafruit.com/welcome-to-circuitpython). 
 Simplifying: you need to reset and enter "boot" mode by quickly pressing the "Reset" button twice. 
-![Seeed Xiao nRF52840](/images/xiao_nRF52840.png)
-Then copy the .uf2 file to the device. The microcontroller will reset automatically.
+
+   ![Seeed Xiao nRF52840](/images/xiao_nRF52840.png)
+
+   Then copy the .uf2 file to the device. The microcontroller will reset automatically.
 3. Add selected CircuitPython library files. Can be download from the [official libraries](https://circuitpython.org/libraries) on the CircuitPython website. Required libriaries are:
 - /adafruit_ble
 - /adafruit_ble_adafruit
