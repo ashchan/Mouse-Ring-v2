@@ -11,12 +11,12 @@ The code was created for the need of easy mouse control with VR headset. Microco
 - movements:
 ![Movements](/images/movements.png)
 2. LEDs communication
-- advertasing for connection: :large_blue_circle: LED blinking (every second)
+- advertasing for connection: :large_blue_circle: blinking every second
 - when connected (alternating at approximately every 5 seconds)
-    - bluetooth connection confirmation: :large_blue_circle: LED blink
-    - battery charge status: :green_circle: LED blink - more then 70%, :orange_circle: LED blink - between 30-69%, :red_circle: LED blink 
-- deep sleep: starting the mode is signaled by successive fast blinks :red_circle:, :green_circle: and :large_blue_circle: LEDs
-- battery charging is indicated by :green_circle: LED
+    - bluetooth connection confirmation: :large_blue_circle: blink
+    - battery charge status: :green_circle: blink - more then 70%, :orange_circle: blink - between 30-69%, :red_circle: blink 
+- deep sleep: starting the mode is signaled by successive fast blinks :red_circle:, :green_circle: and :large_blue_circle:
+- battery charging is indicated by :green_circle: continuous light
 3. Battery charge indication:
 ![Charge indication](/images/charge.png)
 4. Deep Sleep mode for energy saving can be activated in two ways:
