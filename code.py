@@ -121,9 +121,9 @@ device_info = DeviceInfoService(software_revision=adafruit_ble.__version__)
 advertisement = ProvideServicesAdvertisement(hid)
 advertisement.appearance = 961
 scan_response = Advertisement()
-scan_response.complete_name = config['complete_name']
+scan_response.complete_name = config['name']
 ble = adafruit_ble.BLERadio()
-ble.name = config['complete_name'] # set name after connection
+ble.name = config['name'] # set name after connection
 
 # set buttons
 left_BTN = digitalio.DigitalInOut(config['left_btn'])
