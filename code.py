@@ -33,7 +33,6 @@ config = {
     'sp_initial': 0.2,              # scroll settings
     'sp_accel': 0.015,
     'sp_max': 0.01,
-    'deep_sleep_by_click': True,    # flag to activate Deep Sleep through buttons clicks
 }
 config.update(hand_config)
 
@@ -138,6 +137,11 @@ scrollup_BTN.pull = Pull.UP
 scrolldown_BTN = digitalio.DigitalInOut(config['scrolldown_btn'])
 scrolldown_BTN.direction = Direction.INPUT
 scrolldown_BTN.pull = Pull.UP
+# for mouse movement to define left click
+if config['mouse_movement']:
+    enter_BTN = digitalio.DigitalInOut(config['power_btn'])
+    enter_BTN.direction = Direction.INPUT
+    enter_BTN.pull = Pull.UP
 
 # set mouse
 mouse = Mouse(hid.devices)
@@ -150,7 +154,7 @@ scroll_sleep = config['sp_initial']
 
 # Deep Sleep param
 start_time = None
-push_time = 5 # time to push left and right mouse buttons to go sleep
+push_time = 5 # time to push left and right mouse buttons to go sleep (5 seconds)
 IDLE_TIMEOUT = 600 # idle time to activate Deep Sleep (10 minutes)
 last_activity_time = time.monotonic()
 
@@ -211,7 +215,7 @@ def battery_leds():
         green_led.value = False
         red_led.value = False
     else:
-        # below 3.5 / 30%
+        # below 3.5 / 20%
         red_led.value = False
 
 
@@ -238,7 +242,10 @@ def enter_sleep():
     time.sleep(0.2)
     blue_led.value = True
     # Set up a wakeup alarm
-    switch_alarm = alarm.pin.PinAlarm(pin=config['power_btn'], value=False, edge=False, pull=True)
+    if config['mouse_movement']:
+        switch_alarm = alarm.pin.PinAlarm(pin=board.D0, value=False, edge=False, pull=True) # fake pin, not connected
+    else:
+        switch_alarm = alarm.pin.PinAlarm(pin=config['power_btn'], value=False, edge=False, pull=True)
     # Enter sleep until the alarm is triggered
     log('info', "Enter to Deep Sleep")
     alarm.exit_and_deep_sleep_until_alarms(switch_alarm)
@@ -264,34 +271,36 @@ while True:
             time.sleep(0.5)
             blue_led.value = True
             time.sleep(0.5)
-            # Deep Sleep from advertaising
-            if config[('deep_sleep_by_click')]:
-                if left_BTN.value is False or right_BTN.value is False:
-                    start_time = time.monotonic()   # start count button push time
-                    while left_BTN.value is False or right_BTN.value is False:
-                        if time.monotonic() - start_time >= push_time and (right_BTN.value is False or left_BTN.value is False):
-                            enter_sleep()
-                else:
-                    start_time = None
-                                    
+            # check if mouse movement is not set. If yes then skip Deep Sleep by click
+            if not config['mouse_movement']:
+                # Deep Sleep by click from advertaising
+                if config[('deep_sleep_by_click')]:
+                    if left_BTN.value is False or right_BTN.value is False:
+                        start_time = time.monotonic()   # start count button push time
+                        while left_BTN.value is False or right_BTN.value is False:
+                            if time.monotonic() - start_time >= push_time and (right_BTN.value is False or left_BTN.value is False):
+                                enter_sleep()
+                    else:
+                        start_time = None
+                         
             pass
         # Now we're connected
         ble.stop_advertising()
         log('info',f"Connected {ble.connections}")
 
-    while ble.connected: 
-        
+    while ble.connected:
+
         # Check idle timer
         if time.monotonic() - last_activity_time > IDLE_TIMEOUT:
             enter_sleep()
-                 
+            
         # Perform status LED blinks for bluetooth/voltage
         if i == config['blink_interval'] * 2:
             blue_led.value = False
             LEDOFF_TIME = get_delay_time(0.1)
             i = -1
         elif i == config['blink_interval']:
-            battery_leds()          
+            battery_leds()
             battery_service.level = get_batt_percent(battery.voltage)   # info from BatteryService to show icon with percentage in Windows
             LEDOFF_TIME = get_delay_time(0.1)
         elif i % 1000 == 0:
@@ -303,71 +312,104 @@ while True:
             #i = i+1
         i = i+1
 
-        # Handle button clicks           
+        # Handle button clicks
         if left_BTN.value is False:
             if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
                 continue
             DEBOUNCE_TIME = get_delay_time(config['debounce_sleep'])
             # mouse.click(Mouse.LEFT_BUTTON)
-            mouse.press(Mouse.LEFT_BUTTON)
-            start_time = time.monotonic()   # start count button push time
             last_activity_time = time.monotonic()  # Reset the idle timer
-            while left_BTN.value is False:
-                # Deep Sleep trigger
-                if config['deep_sleep_by_click']:
-                    if time.monotonic() - start_time >= push_time:
-                        enter_sleep()                
-                pass
-            mouse.release(Mouse.LEFT_BUTTON)
-            start_time = None
-            log('info',"Left Button is pressed")
+            if config['mouse_movement']:
+                mouse.move(10,0)
+                log('info',"Move right")
+            else:
+                mouse.press(Mouse.LEFT_BUTTON)
+                start_time = time.monotonic()   # start count button push time
+                while left_BTN.value is False:
+                    # Deep Sleep trigger
+                    if config['deep_sleep_by_click']:
+                        if time.monotonic() - start_time >= push_time:
+                            enter_sleep()  
+                    pass
+                mouse.release(Mouse.LEFT_BUTTON)
+                start_time = None
+                log('info',"Left Button is pressed")
 
         elif right_BTN.value is False:
             if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
                 continue
             DEBOUNCE_TIME = get_delay_time(config['debounce_sleep'])
             # mouse.click(Mouse.RIGHT_BUTTON)
-            mouse.press(Mouse.RIGHT_BUTTON) 
-            start_time = time.monotonic()   # start count button push time
             last_activity_time = time.monotonic()  # Reset the idle timer
-            while right_BTN.value is False:
-                # Deep Sleep trigger
-                if config['deep_sleep_by_click']:
-                    if time.monotonic() - start_time >= push_time:
-                        enter_sleep()
-                pass
-            mouse.release(Mouse.RIGHT_BUTTON)
-            start_time = None
-            log('info',"Right Button is pressed")
+            if config['mouse_movement']:
+                mouse.move(-10,0)
+                log('info',"Move left")
+            else:
+                mouse.press(Mouse.RIGHT_BUTTON)
+                start_time = time.monotonic()   # start count button push time
+                while right_BTN.value is False:
+                    # Deep Sleep trigger
+                    if config['deep_sleep_by_click']:
+                        if time.monotonic() - start_time >= push_time:
+                            enter_sleep()
+                    pass
+                mouse.release(Mouse.RIGHT_BUTTON)
+                start_time = None
+                log('info',"Right Button is pressed")
 
         elif not scrollup_BTN.value:
-            if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
-                continue
-            DEBOUNCE_TIME = get_delay_time(scroll_sleep)
-            scroll_sleep -= config['sp_accel']
-            if scroll_sleep < config['sp_max']:
-                scroll_sleep = config['sp_max']
-            DEBOUNCE_TIME = get_delay_time(scroll_sleep)
-            mouse.move(wheel=1)
-            log('info',"Up Button is pressed")
             last_activity_time = time.monotonic()  # Reset the idle timer
-
+            if config['mouse_movement']:
+                if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
+                    continue
+                DEBOUNCE_TIME = get_delay_time(config['debounce_sleep'])
+                mouse.move(0,-10)
+                log('info',"Move up")
+            else:
+                if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
+                    continue
+                DEBOUNCE_TIME = get_delay_time(scroll_sleep)
+                scroll_sleep -= config['sp_accel']
+                if scroll_sleep < config['sp_max']:
+                    scroll_sleep = config['sp_max']
+                DEBOUNCE_TIME = get_delay_time(scroll_sleep)
+                mouse.move(wheel=1)
+                log('info',"Up Button is pressed")
+                
         elif not scrolldown_BTN.value:
-            if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
-                continue
-            DEBOUNCE_TIME = get_delay_time(scroll_sleep)
-            scroll_sleep -= config['sp_accel']
-            if scroll_sleep < config['sp_max']:
-                scroll_sleep = config['sp_max']
-            DEBOUNCE_TIME = get_delay_time(scroll_sleep)
-            mouse.move(wheel=-1)
-            log('info',"Down Button is pressed")
             last_activity_time = time.monotonic()  # Reset the idle timer
-
+            if config['mouse_movement']:
+                if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
+                    continue
+                DEBOUNCE_TIME = get_delay_time(config['debounce_sleep'])
+                mouse.move(0,10)
+                log('info',"Move down")
+            else:
+                if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
+                    continue
+                DEBOUNCE_TIME = get_delay_time(scroll_sleep)
+                scroll_sleep -= config['sp_accel']
+                if scroll_sleep < config['sp_max']:
+                    scroll_sleep = config['sp_max']
+                DEBOUNCE_TIME = get_delay_time(scroll_sleep)
+                mouse.move(wheel=-1)
+                log('info',"Down Button is pressed")
+            
+        elif config['mouse_movement']:
+            if enter_BTN.value is False:
+                last_activity_time = time.monotonic()  # Reset the idle timer
+                if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
+                    continue
+                DEBOUNCE_TIME = get_delay_time(config['debounce_sleep'])
+                mouse.press(Mouse.LEFT_BUTTON)
+                while enter_BTN.value is False:
+                    pass
+                mouse.release(Mouse.LEFT_BUTTON)
+                log('info',"Left Button is pressed")
+                
         else:
             if scroll_sleep != config['sp_initial']:
                 log('info',"scroll_sleep reset")
                 scroll_sleep = config['sp_initial']
-                   
+
     log('info','Not Connected (lost connection)')
-    
