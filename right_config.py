@@ -3,8 +3,8 @@
 import board
 config = {
     'name': 'Right Mouse Ring',
-    'left_btn': board.D0,
-    'right_btn': board.D3,
+    'left_btn': board.D3,
+    'right_btn': board.D5,
     'scrollup_btn': board.D2,
     'scrolldown_btn': board.D1,
     'power_btn': board.D6,
