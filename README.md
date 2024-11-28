@@ -4,17 +4,30 @@
 
 ![Rings](/images/rings.png)
 
-HID controller with joystick (4 ways and push). There are: left mouse click, right mouse click, wheel up and wheel down as joystick axis and push to recover from deep sleep. Built on the basis of the "Seeed Studio XIAO nRF52840" microcontroller and programmed in CircuitPython. Cotroller is connecting with PC by Bluetooth.
+HID controller with joystick (4 ways and push). There are two functionalities to choose:
 
-The code was created for the need of easy mouse control with VR headset. Microcontroller is a core part of Ring made of according the [instruction](https://www.instructables.com/Ring-With-Mouse-Buttons-Wheel-v2/). It's updated version of [orginal one](https://www.instructables.com/Ring-With-Mouse-Buttons-Wheel/).
+- left mouse click, right mouse click, wheel up and wheel down as joystick axis and push to recover from deep sleep
+- joystick as mouse movement and left click by push
+
+Built on the basis of the "Seeed Studio XIAO nRF52840" microcontroller and programmed in CircuitPython. Cotroller is connecting with PC by Bluetooth.
+
+The code was created for the need of easy mouse control with VR headset. Microcontroller is a core part of Ring made of according the [instruction](https://www.instructables.com/Mouse-Ring-V2/). It's updated version of [original one](https://www.instructables.com/Ring-With-Mouse-Buttons-Wheel/).
 
 ## Usability
 
 1. Joystick operations
 
-- movements:
+- as mouse clicks only:
 
-  ![Movements](/images/movements.png)
+  ![Clicks only](/images/clicks.png)
+
+- as pointer movement:
+
+  ![Movement](/images/movements.png)
+
+  > **Note**: as the _push button_ is occupied by the _left mouse click_, waking up from _deep sleep_ is only possible via the _reset button_.
+
+Of course, different configurations are possible for the left and right Ring.
 
 2. LEDs communication
 
@@ -69,9 +82,26 @@ Waking up occurs by clicking the joystick.
 
 ## Programming the microcontroller
 
-Copy the files _right_config.py_, _left_config.py_ and _code.py_ onto both devices directly, then:
+1. Setting the operation mode in _left_config.py_ and _right_config.py_.
+
+- to work as mouse clicks:
+  ```python
+    'mouse_movement': False,
+  ```
+- to work as pointer movement mode:
+  ```python
+    'mouse_movement': True,
+  ```
+
+2. Upload _config.py_
+
+   Copy the files _right_config.py_, _left_config.py_ and _code.py_ onto both devices directly, then:
 
 - for the right controller change file name _right_config.py_ to the _config.py_. File _left_config.py_ can be deleted.
 - for the left controller change file name _left_config.py_ to _config.py_. File _right_config.py_ can be deleted.
+
+Correct files structure on the CIRCUITPY:
+
+![Files](/images/files.png)
 
 Reconnect device. Will be visible for Bluetooth and ready to connect.
