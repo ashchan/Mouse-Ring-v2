@@ -27,7 +27,7 @@ The code was created for the need of easy mouse control with VR headset. Microco
 
   > **Note**: as the _push button_ is occupied by the _left mouse click_, waking up from _deep sleep_ is only possible via the _reset button_.
 
-Of course, different configurations are possible for the left and right Ring.
+Of course, different configurations are possible for the Left and right Ring.
 
 2. LEDs communication
 
