@@ -1,4 +1,4 @@
-# Mouse-buttons-and-wheel v2 (joystick)
+# Mouse Ring v2 (joystick)
 
 ## Description
 
