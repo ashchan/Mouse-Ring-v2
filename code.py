@@ -6,7 +6,7 @@ import supervisor
 import storage
 import alarm
 from adafruit_hid.mouse import Mouse
-from adafruit_debouncer import Button
+# from adafruit_debouncer import Button
 from digitalio import DigitalInOut, Direction, Pull
 from seeed_xiao_nrf52840 import Battery
 from adafruit_ble.services.standard import BatteryService
