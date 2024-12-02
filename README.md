@@ -9,9 +9,9 @@ HID controller with joystick (4 ways and push). There are two functionalities to
 - left mouse click, right mouse click, wheel up and wheel down as joystick axis and push to recover from deep sleep
 - joystick as mouse movement and left click by push
 
-Built on the basis of the "Seeed Studio XIAO nRF52840" microcontroller and programmed in CircuitPython. Cotroller is connecting with PC by Bluetooth.
+Built on the basis of the "[Seeed Studio XIAO nRF52840](https://www.seeedstudio.com/Seeed-XIAO-BLE-nRF52840-p-5201.html)" microcontroller and programmed in CircuitPython. Controller connects with PC by Bluetooth.
 
-The code was created for the need of easy mouse control with VR headset. Microcontroller is a core part of Ring made of according the [instruction](https://www.instructables.com/Mouse-Ring-V2/). It's updated version of [original one](https://www.instructables.com/Ring-With-Mouse-Buttons-Wheel/).
+The code was created for the need of easy mouse control with a VR headset. Microcontroller is a core part of Ring made of according the [instruction](https://www.instructables.com/Mouse-Ring-V2/). It's updated version of [original one](https://www.instructables.com/Ring-With-Mouse-Buttons-Wheel/).
 
 ## Usability
 
