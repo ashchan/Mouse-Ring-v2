@@ -27,7 +27,7 @@ from config import config as hand_config
 config = {
     'charge_current': Battery.CHARGE_50MA,
     'log_level': 'info',
-    'log_to_disk': True,
+    'log_to_disk': False,
     'blink_interval': 20000,        # lower to blink status more frequently
     'debounce_sleep': 0.15,         # for button debounce
     'sp_initial': 0.2,              # scroll settings
