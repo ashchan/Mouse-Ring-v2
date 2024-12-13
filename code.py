@@ -28,11 +28,11 @@ config = {
     'charge_current': Battery.CHARGE_50MA,
     'log_level': 'info',
     'log_to_disk': False,
-    'blink_interval': 20000,        # lower to blink status more frequently
+    'blink_interval': 30000,        # lower to blink status more frequently
     'debounce_sleep': 0.15,         # for button debounce
     'sp_initial': 0.2,              # scroll settings
-    'sp_accel': 0.015,
-    'sp_max': 0.01,
+    'sp_accel': 0.015,              # scroll acceleration
+    'sp_max': 0.02,                 # max scroll speed
 }
 config.update(hand_config)
 
@@ -154,8 +154,8 @@ scroll_sleep = config['sp_initial']
 
 # Deep Sleep param
 start_time = None
-push_time = 10 # time to push left and right mouse buttons to go sleep (5 seconds)
-IDLE_TIMEOUT = 600 # idle time to activate Deep Sleep (10 minutes)
+push_time = 10 # time to push left and right mouse buttons to go sleep (10 seconds)
+IDLE_TIMEOUT = 900 # idle time to activate Deep Sleep (15 minutes)
 last_activity_time = time.monotonic()
 
 ##########################
