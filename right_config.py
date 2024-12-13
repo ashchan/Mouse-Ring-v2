@@ -9,5 +9,5 @@ config = {
     'scrolldown_btn': board.D1,
     'power_btn': board.D6,
     'mouse_movement': False,        # True - mouse movement & left click; False - mouse buttons & scroll
-    'deep_sleep_by_click': True,    # True - activate Deep Sleep by holding buttons for 5 seconds. Valid only when mouse_movement is False
+    'deep_sleep_by_click': True,    # True - activate Deep Sleep by holding buttons for 10 seconds. Valid only when mouse_movement is False
 }

@@ -44,7 +44,7 @@ Of course, different configurations are possible for the Left and right Ring.
 
 4. Deep Sleep mode for energy saving can be activated in two ways:
 
-- by long press (around 5 seconds) left or right clicks
+- by long press (around 10 seconds) left or right clicks
 - automatically after about 10 minutes of inactivity
 
 Waking up occurs by clicking the joystick.

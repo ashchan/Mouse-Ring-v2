@@ -154,7 +154,7 @@ scroll_sleep = config['sp_initial']
 
 # Deep Sleep param
 start_time = None
-push_time = 5 # time to push left and right mouse buttons to go sleep (5 seconds)
+push_time = 10 # time to push left and right mouse buttons to go sleep (5 seconds)
 IDLE_TIMEOUT = 600 # idle time to activate Deep Sleep (10 minutes)
 last_activity_time = time.monotonic()
 
