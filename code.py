@@ -329,7 +329,7 @@ while True:
                 start_time = time.monotonic()
                 while left_BTN.value is False:
                     if time.monotonic() - start_time > movement_accel_delay:
-                        mouse.move(10, 0)
+                        mouse.move(5, 0)
                 start_time = None
             else:
                 mouse.press(Mouse.LEFT_BUTTON)
@@ -356,7 +356,7 @@ while True:
                 start_time = time.monotonic()
                 while right_BTN.value is False:
                     if time.monotonic() - start_time > movement_accel_delay:
-                        mouse.move(-10, 0)
+                        mouse.move(-5, 0)
                 start_time = None
             else:
                 mouse.press(Mouse.RIGHT_BUTTON)
@@ -382,7 +382,7 @@ while True:
                 start_time = time.monotonic()
                 while scrollup_BTN.value is False:
                     if time.monotonic() - start_time > movement_accel_delay:
-                        mouse.move(0,-10)
+                        mouse.move(0,-5)
                 start_time = None
             else:
                 if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
@@ -406,7 +406,7 @@ while True:
                 start_time = time.monotonic()
                 while scrolldown_BTN.value is False:
                     if time.monotonic() - start_time > movement_accel_delay:
-                        mouse.move(0,10)
+                        mouse.move(0,5)
                 start_time = None
             else:
                 if DEBOUNCE_TIME is not None and DEBOUNCE_TIME > time.monotonic_ns():
